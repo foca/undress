@@ -24,6 +24,10 @@ module Rainbow
       end.join("")
     end
 
+    def self.surrounded_by_whitespace?(node)
+      node.previous.text? && node.previous.to_s =~ /\s+$/ || node.next.text? && node.next.to_s =~ /^\s+/
+    end
+
     MAPPINGS = {
       # inline elements
       :strong  => lambda {|e| "*#{textilize(e.children)}*" },
@@ -38,6 +42,9 @@ module Rainbow
                     alt = e.has_attribute?("alt") ? "(#{e["alt"]})" : ""
                     "!#{e["src"]}#{alt}!"
                   },
+
+      :sup     => lambda {|e| surrounded_by_whitespace?(e) ? "^#{textilize(e.children)}^" : "[^#{textilize(e.children)}^]" },
+      :sub     => lambda {|e| surrounded_by_whitespace?(e) ? "~#{textilize(e.children)}~" : "[~#{textilize(e.children)}~]" },
 
       # headings
       :h1      => lambda {|e| "\n\nh1. #{textilize(e.children)}\n\n" },

@@ -29,6 +29,16 @@ class RainbowTest < Test::Unit::TestCase
       test "converts <cite> tags" do
         assert_renders_textile "??foo bar??", "<cite>foo bar</cite>"
       end
+
+      test "converts <sup> tags" do
+        assert_renders_textile "foo ^sup^ bar", "foo <sup>sup</sup> bar"
+        assert_renders_textile "foo[^sup^]bar", "foo<sup>sup</sup>bar"
+      end
+
+      test "converts <sub> tags" do
+        assert_renders_textile "foo ~sub~ bar", "foo <sub>sub</sub> bar"
+        assert_renders_textile "foo[~sub~]bar", "foo<sub>sub</sub>bar"
+      end
     end
 
     context "links" do
