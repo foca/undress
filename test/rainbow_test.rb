@@ -39,6 +39,14 @@ class RainbowTest < Test::Unit::TestCase
         assert_renders_textile "foo ~sub~ bar", "foo <sub>sub</sub> bar"
         assert_renders_textile "foo[~sub~]bar", "foo<sub>sub</sub>bar"
       end
+
+      test "converts <ins> tags" do
+        assert_renders_textile "+foo bar+", "<ins>foo bar</ins>"
+      end
+
+      test "converts <del> tags" do
+        assert_renders_textile "-foo bar-", "<del>foo bar</del>"
+      end
     end
 
     context "links" do

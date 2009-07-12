@@ -30,10 +30,6 @@ module Rainbow
 
     MAPPINGS = {
       # inline elements
-      :strong  => lambda {|e| "*#{textilize(e.children)}*" },
-      :em      => lambda {|e| "_#{textilize(e.children)}_" },
-      :code    => lambda {|e| "@#{textilize(e.children)}@" },
-      :cite    => lambda {|e| "??#{textilize(e.children)}??" },
       :a       => lambda {|e|
                     title = e.has_attribute?("title") ? " (#{e["title"]})" : ""
                     "[#{textilize(e.children)}#{title}:#{e["href"]}]"
@@ -42,9 +38,14 @@ module Rainbow
                     alt = e.has_attribute?("alt") ? "(#{e["alt"]})" : ""
                     "!#{e["src"]}#{alt}!"
                   },
-
+      :strong  => lambda {|e| "*#{textilize(e.children)}*" },
+      :em      => lambda {|e| "_#{textilize(e.children)}_" },
+      :code    => lambda {|e| "@#{textilize(e.children)}@" },
+      :cite    => lambda {|e| "??#{textilize(e.children)}??" },
       :sup     => lambda {|e| surrounded_by_whitespace?(e) ? "^#{textilize(e.children)}^" : "[^#{textilize(e.children)}^]" },
       :sub     => lambda {|e| surrounded_by_whitespace?(e) ? "~#{textilize(e.children)}~" : "[~#{textilize(e.children)}~]" },
+      :ins     => lambda {|e| "+#{textilize(e.children)}+" },
+      :del     => lambda {|e| "-#{textilize(e.children)}-" },
 
       # headings
       :h1      => lambda {|e| "\n\nh1. #{textilize(e.children)}\n\n" },
