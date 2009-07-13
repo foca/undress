@@ -1,7 +1,11 @@
 require "hpricot"
 
 module Rainbow
-  class HTML
+  def self.new(document)
+    Parser.new(document)
+  end
+
+  class Parser
     attr_reader :doc
 
     def initialize(document)
@@ -9,103 +13,120 @@ module Rainbow
     end
 
     def to_textile
-      self.class.textilize(doc.children)
+      Textile.process(doc.children)
     end
 
-    def self.textilize(nodes)
-      Array(nodes).map do |node|
-        if node.text?
-          node.to_s
-        elsif node.elem?
-          (MAPPINGS[node.name.to_sym] || MAPPINGS[:*])[node]
-        else
-          ""
+    class Grammar
+      class << self
+        def rule(*tags, &handler)
+          tags.each {|t| processing_rules[t.to_sym] = handler }
         end
-      end.join("")
+
+        def default(&handler)
+          default_rule = handler
+        end
+
+        def process(nodes)
+          Array(nodes).map do |node|
+            if node.text?
+              node.to_s
+            elsif node.elem?
+              (processing_rules[node.name.to_sym] || default_rule).call(node)
+            else
+              ""
+            end
+          end.join("")
+        end
+
+        def surrounded_by_whitespace?(node)
+          node.previous.text? && node.previous.to_s =~ /\s+$/ || node.next.text? && node.next.to_s =~ /^\s+/
+        end
+
+        private
+
+          def processing_rules
+            @processing_rules ||= {}
+          end
+
+          def default_rule
+            @default_rule ||= lambda {|e| process(e.children) }
+          end
+      end
     end
 
-    def self.surrounded_by_whitespace?(node)
-      node.previous.text? && node.previous.to_s =~ /\s+$/ || node.next.text? && node.next.to_s =~ /^\s+/
-    end
-
-    MAPPINGS = {
+    class Textile < Grammar
       # inline elements
-      :a          => lambda {|e|
-                       title = e.has_attribute?("title") ? " (#{e["title"]})" : ""
-                       "[#{textilize(e.children)}#{title}:#{e["href"]}]"
-                     },
-      :img        => lambda {|e|
-                       alt = e.has_attribute?("alt") ? "(#{e["alt"]})" : ""
-                       "!#{e["src"]}#{alt}!"
-                     },
-      :strong     => lambda {|e| "*#{textilize(e.children)}*" },
-      :em         => lambda {|e| "_#{textilize(e.children)}_" },
-      :code       => lambda {|e| "@#{textilize(e.children)}@" },
-      :cite       => lambda {|e| "??#{textilize(e.children)}??" },
-      :sup        => lambda {|e| surrounded_by_whitespace?(e) ? "^#{textilize(e.children)}^" : "[^#{textilize(e.children)}^]" },
-      :sub        => lambda {|e| surrounded_by_whitespace?(e) ? "~#{textilize(e.children)}~" : "[~#{textilize(e.children)}~]" },
-      :ins        => lambda {|e| "+#{textilize(e.children)}+" },
-      :del        => lambda {|e| "-#{textilize(e.children)}-" },
+      rule(:a) {|e|
+        title = e.has_attribute?("title") ? " (#{e["title"]})" : ""
+        "[#{process(e.children)}#{title}:#{e["href"]}]"
+      }
+      rule(:img) {|e|
+        alt = e.has_attribute?("alt") ? "(#{e["alt"]})" : ""
+        "!#{e["src"]}#{alt}!"
+      }
+      rule(:strong) {|e| "*#{process(e.children)}*" }
+      rule(:em)     {|e| "_#{process(e.children)}_" }
+      rule(:code)   {|e| "@#{process(e.children)}@" }
+      rule(:cite)   {|e| "??#{process(e.children)}??" }
+      rule(:sup)    {|e| surrounded_by_whitespace?(e) ? "^#{process(e.children)}^" : "[^#{process(e.children)}^]" }
+      rule(:sub)    {|e| surrounded_by_whitespace?(e) ? "~#{process(e.children)}~" : "[~#{process(e.children)}~]" }
+      rule(:ins)    {|e| "+#{process(e.children)}+" }
+      rule(:del)    {|e| "-#{process(e.children)}-" }
 
-      # Text formatting and layout
-      :p          => lambda {|e| "\n\n#{textilize(e.children)}\n\n" },
-      :pre        => lambda {|e|
-                       if e.children.all? {|n| n.text? && n.content =~ /^\s+$/ || n.elem? && n.name == "code" }
-                         "pc. #{textilize((e % "code").children)}\n"
-                       else
-                         "<pre>#{textilize(e.children)}</pre>"
-                       end
-                     },
-      :br         => lambda {|e| "\n" },
-      :blockquote => lambda {|e| "bq. #{textilize(e.children)}\n" },
+      # text formatting and layout
+      rule(:p)          {|e| "\n\n#{process(e.children)}\n\n" }
+      rule(:br)         {|e| "\n" }
+      rule(:blockquote) {|e| "bq. #{process(e.children)}\n" }
+      rule(:pre)        {|e|
+        if e.children.all? {|n| n.text? && n.content =~ /^\s+$/ || n.elem? && n.name == "code" }
+          "pc. #{process((e % "code").children)}\n"
+        else
+          "<pre>#{process(e.children)}</pre>"
+        end
+      }
 
       # headings
-      :h1         => lambda {|e| "\n\nh1. #{textilize(e.children)}\n\n" },
-      :h2         => lambda {|e| "\n\nh2. #{textilize(e.children)}\n\n" },
-      :h3         => lambda {|e| "\n\nh3. #{textilize(e.children)}\n\n" },
-      :h4         => lambda {|e| "\n\nh4. #{textilize(e.children)}\n\n" },
-      :h5         => lambda {|e| "\n\nh5. #{textilize(e.children)}\n\n" },
-      :h6         => lambda {|e| "\n\nh6. #{textilize(e.children)}\n\n" },
+      rule(:h1) {|e| "\n\nh1. #{process(e.children)}\n\n" }
+      rule(:h2) {|e| "\n\nh2. #{process(e.children)}\n\n" }
+      rule(:h3) {|e| "\n\nh3. #{process(e.children)}\n\n" }
+      rule(:h4) {|e| "\n\nh4. #{process(e.children)}\n\n" }
+      rule(:h5) {|e| "\n\nh5. #{process(e.children)}\n\n" }
+      rule(:h6) {|e| "\n\nh6. #{process(e.children)}\n\n" }
 
       # lists
-      :li         => lambda {|e|
-                       token = e.parent.name == "ul" ? "*" : "#"
-                       nesting = e.ancestors.inject(1) {|total,node| total + (%(ul ol).include?(node.name) ? 0 : 1) }
-                       "\n#{token * nesting} #{textilize(e.children)}"
-                     },
-      :ul         => list_processor = lambda {|e|
-                       if e.ancestors.detect {|node| %(ul ol).include?(node.name) }
-                         textilize(e.children)
-                       else
-                         "\n#{textilize(e.children)}\n\n"
-                       end
-                     },
-      :ol         => list_processor,
+      rule(:li) {|e|
+        token = e.parent.name == "ul" ? "*" : "#"
+        nesting = e.ancestors.inject(1) {|total,node| total + (%(ul ol).include?(node.name) ? 0 : 1) }
+        "\n#{token * nesting} #{process(e.children)}"
+      }
+      rule(:ul, :ol) {|e|
+        if e.ancestors.detect {|node| %(ul ol).include?(node.name) }
+          process(e.children)
+        else
+          "\n#{process(e.children)}\n\n"
+        end
+      }
 
       # definition lists
-      :dl         => lambda {|e| "\n\n#{textilize(e.children)}\n" },
-      :dt         => lambda {|e| "- #{textilize(e.children)} " },
-      :dd         => lambda {|e| ":= #{textilize(e.children)} =:\n" },
+      rule(:dl) {|e| "\n\n#{process(e.children)}\n" }
+      rule(:dt) {|e| "- #{process(e.children)} " }
+      rule(:dd) {|e| ":= #{process(e.children)} =:\n" }
 
       # tables
-      :table      => lambda {|e| "\n\n#{textilize(e.children)}\n" },
-      :tr         => lambda {|e| "#{textilize(e.children)}|\n" },
-      :td         => table_cell = lambda {|e|
-                       prefix = if e.name == "th"
-                         "_. "
-                       elsif e.has_attribute?("colspan")
-                         "\\#{e["colspan"]}. "
-                       elsif e.has_attribute?("rowspan")
-                         "/#{e["rowspan"]}. "
-                       end
+      rule(:table) {|e| "\n\n#{process(e.children)}\n" }
+      rule(:tr) {|e| "#{process(e.children)}|\n" }
+      rule(:td, :th) {|e|
+        prefix = if e.name == "th"
+          "_. "
+        elsif e.has_attribute?("colspan")
+          "\\#{e["colspan"]}. "
+        elsif e.has_attribute?("rowspan")
+          "/#{e["rowspan"]}. "
+        end
 
-                       "|#{prefix}#{textilize(e.children)}" 
-                     },
-      :th         => table_cell,
-
-      # anything else
-      :*          => lambda {|e| textilize(e.children) }
-    }
+        "|#{prefix}#{process(e.children)}" 
+      }
+    end
 
     class ::Hpricot::Text
       def children; self; end

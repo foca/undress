@@ -5,7 +5,7 @@ require File.expand_path(File.dirname(__FILE__) + "/../lib/rainbow")
 
 class RainbowTest < Test::Unit::TestCase
   def assert_renders_textile(textile, html)
-    assert_equal textile, Rainbow::HTML.new(html).to_textile
+    assert_equal textile, Rainbow.new(html).to_textile
   end
 
   context "Converting HTML" do
