@@ -8,7 +8,7 @@ end
 
 Rake::RDocTask.new do |rd|
   rd.main = "README"
-  rd.title = "API Documentation for RainbowCloth"
+  rd.title = "API Documentation for Undress"
   rd.rdoc_files.include("README.rdoc", "LICENSE", "lib/**/*.rb")
   rd.rdoc_dir = "doc"
 end
@@ -20,7 +20,7 @@ end
 
 begin
   require "mg"
-  MG.new("rainbow_cloth.gemspec")
+  MG.new("undress.gemspec")
 rescue LoadError
 end
 
