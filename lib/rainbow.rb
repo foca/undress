@@ -87,6 +87,22 @@ module Rainbow
       :dt         => lambda {|e| "- #{textilize(e.children)} " },
       :dd         => lambda {|e| ":= #{textilize(e.children)} =:\n" },
 
+      # tables
+      :table      => lambda {|e| "\n\n#{textilize(e.children)}\n" },
+      :tr         => lambda {|e| "#{textilize(e.children)}|\n" },
+      :td         => table_cell = lambda {|e|
+                       prefix = if e.name == "th"
+                         "_. "
+                       elsif e.has_attribute?("colspan")
+                         "\\#{e["colspan"]}. "
+                       elsif e.has_attribute?("rowspan")
+                         "/#{e["rowspan"]}. "
+                       end
+
+                       "|#{prefix}#{textilize(e.children)}" 
+                     },
+      :th         => table_cell,
+
       # anything else
       :*          => lambda {|e| textilize(e.children) }
     }

@@ -145,5 +145,27 @@ class RainbowTest < Test::Unit::TestCase
                                "<dl><dt>foo</dt><dd>defining foo</dd><dt>bar</dt><dd>defining bar</dd></dl>"
       end
     end
+
+    context "tables" do
+      test "converts a simple table" do
+        assert_renders_textile "\n\n|foo|bar|baz|\n|1|2|3|\n\n",
+                               "<table><tr><td>foo</td><td>bar</td><td>baz</td></tr><tr><td>1</td><td>2</td><td>3</td></tr></table>"
+      end
+
+      test "converts a table with headers" do
+        assert_renders_textile "\n\n|_. foo|_. bar|_. baz|\n|1|2|3|\n\n",
+                               "<table><tr><th>foo</th><th>bar</th><th>baz</th></tr><tr><td>1</td><td>2</td><td>3</td></tr></table>"
+      end
+
+      test "converts a table with cells that span multiple columns" do
+        assert_renders_textile "\n\n|foo|bar|baz|\n|\\2. 1|2|\n\n",
+                               "<table><tr><td>foo</td><td>bar</td><td>baz</td></tr><tr><td colspan='2'>1</td><td>2</td></tr></table>"
+      end
+
+      test "converts a table with cells that span multiple rows" do
+        assert_renders_textile "\n\n|/2. foo|bar|baz|\n|1|2|\n\n",
+                               "<table><tr><td rowspan='2'>foo</td><td>bar</td><td>baz</td></tr><tr><td>1</td><td>2</td></tr></table>"
+      end
+    end
   end
 end
