@@ -1,14 +1,14 @@
 require "test/unit"
 require "contest"
 require "ruby-debug"
-require File.expand_path(File.dirname(__FILE__) + "/../lib/rainbow")
+require File.expand_path(File.dirname(__FILE__) + "/../lib/rainbow_cloth")
 
-class RainbowTest < Test::Unit::TestCase
+class RainbowClothTest < Test::Unit::TestCase
   def assert_renders_textile(textile, html)
-    assert_equal textile, Rainbow.new(html).to_textile
+    assert_equal textile, RainbowCloth.new(html).to_textile
   end
 
-  context "Converting HTML" do
+  context "Converting HTML to textile" do
     test "converts nested tags" do
       assert_renders_textile "\n\nh2. _this is *very* important_\n\n", "<h2><em>this is <strong>very</strong> important</em></h2>"
     end

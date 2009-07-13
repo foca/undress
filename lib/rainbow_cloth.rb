@@ -1,6 +1,6 @@
 require "hpricot"
 
-module Rainbow
+module RainbowCloth
   def self.new(document)
     Parser.new(document)
   end
