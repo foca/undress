@@ -1,0 +1,34 @@
+require File.expand_path(File.dirname(__FILE__) + "/test_helper")
+
+module RainbowCloth
+  class Parent < Grammar
+    rule_for(:p) {|e| "<this is a paragraph>#{content_of(e)}</this is a paragraph>" }
+  end
+
+  class WithPreProcessingRules < Parent
+    pre_processing("p.foo") {|e| e.swap("<div>Cuack</div>") }
+    rule_for(:div) {|e| "<this was a div>#{content_of(e)}</this was a div>" }
+  end
+
+  class Child < Parent; end
+
+  class TestGrammar < Test::Unit::TestCase
+    def parse_with(grammar, html)
+      grammar.process!(Hpricot(html))
+    end
+
+    context "extending a grammar" do
+      test "the extended grammar should inherit the rules of the parent" do
+        output = parse_with Child, "<p>Foo Bar</p>"
+        assert_equal "<this is a paragraph>Foo Bar</this is a paragraph>", output
+      end
+    end
+
+    context "pre processing rules" do
+      test "mutate the DOM before parsing the tags" do
+        output = parse_with WithPreProcessingRules, "<p class='foo'>Blah</p><p>O hai</p>"
+        assert_equal "<this was a div>Cuack</this was a div><this is a paragraph>O hai</this is a paragraph>", output
+      end
+    end
+  end
+end
