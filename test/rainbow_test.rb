@@ -69,6 +69,29 @@ class RainbowTest < Test::Unit::TestCase
       end
     end
 
+    context "text formatting" do
+      test "converts paragraphs" do
+        assert_renders_textile "\n\nfoo bar\n\n", "<p>foo bar</p>"
+      end
+
+      test "converts <pre> tags which only contain a <code> child" do
+        assert_renders_textile "pc. var foo = 1;\n", "<pre><code>var foo = 1;</code></pre>"
+        assert_renders_textile "pc. var foo = 1;\n", "<pre>   <code>var foo = 1;</code>   </pre>"
+      end
+
+      test "leaves <pre> tags which contain mixed content as HTML" do
+        assert_renders_textile "<pre>  foo bar</pre>", "<pre>  foo bar</pre>"
+      end
+
+      test "converts <br> into a new line" do
+        assert_renders_textile "\n", "<br/>"
+      end
+
+      test "converts blockquotes" do
+        assert_renders_textile "bq. foo bar\n", "<blockquote><div>foo bar</div></blockquote>"
+      end
+    end
+
     context "headers" do
       test "converts <h1> tags" do
         assert_renders_textile "\n\nh1. foo bar\n\n", "<h1>foo bar</h1>"
