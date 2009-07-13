@@ -1,12 +1,7 @@
 module RainbowCloth
   class Grammar
     def initialize(parent=nil, &block)
-      if parent
-        processing_rules.update(parent.processing_rules)
-        post_processing_rules.update(parent.post_processing_rules)
-        pre_processing_rules.update(parent.pre_processing_rules)
-        @default_rule = parent.default_rule.dup
-      end
+      @parent = parent
       instance_eval(&block) if block
     end
 
@@ -31,7 +26,7 @@ module RainbowCloth
         if node.text?
           node.to_html
         elsif node.elem?
-          (processing_rules[node.name.to_sym] || default_rule).call(node)
+          rule_for_tag(node.name).call(node)
         else
           ""
         end
@@ -56,6 +51,11 @@ module RainbowCloth
       else
         process(node.children)
       end
+    end
+
+    def rule_for_tag(tag_name)
+      processing_rules[tag_name.to_sym] || (@parent && @parent.processing_rules[tag_name.to_sym]) ||
+        default_rule || (@parent && @parent.default_rule)
     end
 
     def surrounded_by_whitespace?(node)
