@@ -1,9 +1,9 @@
-= RainbowCloth
+= Undress
 
 Easily convert back HTML to Textile, Markdown, RDoc or whatever other
 markup language you like.
 
-    require "rainbow_cloth"
+    require "undress"
 
     code =<<html
       <h1>Hello world!</h1>
@@ -15,7 +15,7 @@ markup language you like.
       </ul>
     html
 
-    RainbowCloth.new(code).to_textile
+    Undress(code).to_textile
 
 Will produce
 

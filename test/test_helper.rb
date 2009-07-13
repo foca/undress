@@ -1,6 +1,8 @@
 require "test/unit"
 require "contest"
-require File.expand_path(File.dirname(__FILE__) + "/../lib/rainbow_cloth")
+Dir[File.expand_path(File.dirname(__FILE__) + "/../lib/**/*.rb")].each do |file|
+  require file
+end
 
 begin
   require "redgreen"

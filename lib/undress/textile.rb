@@ -1,10 +1,6 @@
-module RainbowCloth
-  class Document
-    def to_textile
-      Textile.process!(doc)
-    end
-  end
+require File.expand_path(File.dirname(__FILE__) + "/../undress")
 
+module Undress
   class Textile < Grammar
     # whitespace handling
     post_processing(/\n\n+/, "\n\n")
@@ -95,4 +91,6 @@ module RainbowCloth
       "|#{prefix}#{content_of(e)}" 
     }
   end
+
+  add_markup :textile, Textile
 end

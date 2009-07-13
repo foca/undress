@@ -1,4 +1,4 @@
-module RainbowCloth
+module Undress
   class Grammar
     def self.inherited(base)
       base.instance_variable_set(:@post_processing_rules, post_processing_rules)

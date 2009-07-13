@@ -1,6 +1,6 @@
 require File.expand_path(File.dirname(__FILE__) + "/test_helper")
 
-module RainbowCloth
+module Undress
   class TestGrammar < Test::Unit::TestCase
     class Parent < Grammar
       rule_for(:p) {|e| "<this is a paragraph>#{content_of(e)}</this is a paragraph>" }
