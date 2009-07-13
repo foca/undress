@@ -3,7 +3,7 @@
 Easily convert back HTML to Textile, Markdown, RDoc or whatever other
 markup language you like.
 
-    require "undress"
+    require "undress/textile"
 
     code =<<html
       <h1>Hello world!</h1>
