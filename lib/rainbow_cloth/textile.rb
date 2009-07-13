@@ -6,6 +6,22 @@ module RainbowCloth
   end
 
   class Textile < Grammar
+    # whitespace handling
+    post_processing(/\n\n+/, "\n\n")
+    post_processing(/\A\s+/, "")
+    post_processing(/\s+\z/, "\n")
+
+    # special characters introduced by textile
+    post_processing(/&#8230;/, "...")
+    post_processing(/&#8217;/, "'")
+    post_processing(/&#822[01];/, '"')
+    post_processing(/&#8212;/, "--")
+    post_processing(/&#8211;/, "-")
+    post_processing(/(\d+\s*)&#215;(\s*\d+)/, '\1x\2')
+    post_processing(/&#174;/, "(r)")
+    post_processing(/&#169;/, "(c)")
+    post_processing(/&#8482;/, "(tm)")
+
     # inline elements
     rule_for(:a) {|e|
       title = e.has_attribute?("title") ? " (#{e["title"]})" : ""
@@ -15,14 +31,15 @@ module RainbowCloth
       alt = e.has_attribute?("alt") ? "(#{e["alt"]})" : ""
       "!#{e["src"]}#{alt}!"
     }
-    rule_for(:strong) {|e| "*#{content_of(e)}*" }
-    rule_for(:em)     {|e| "_#{content_of(e)}_" }
-    rule_for(:code)   {|e| "@#{content_of(e)}@" }
-    rule_for(:cite)   {|e| "??#{content_of(e)}??" }
-    rule_for(:sup)    {|e| surrounded_by_whitespace?(e) ? "^#{content_of(e)}^" : "[^#{content_of(e)}^]" }
-    rule_for(:sub)    {|e| surrounded_by_whitespace?(e) ? "~#{content_of(e)}~" : "[~#{content_of(e)}~]" }
-    rule_for(:ins)    {|e| "+#{content_of(e)}+" }
-    rule_for(:del)    {|e| "-#{content_of(e)}-" }
+    rule_for(:strong)  {|e| "*#{content_of(e)}*" }
+    rule_for(:em)      {|e| "_#{content_of(e)}_" }
+    rule_for(:code)    {|e| "@#{content_of(e)}@" }
+    rule_for(:cite)    {|e| "??#{content_of(e)}??" }
+    rule_for(:sup)     {|e| surrounded_by_whitespace?(e) ? "^#{content_of(e)}^" : "[^#{content_of(e)}^]" }
+    rule_for(:sub)     {|e| surrounded_by_whitespace?(e) ? "~#{content_of(e)}~" : "[~#{content_of(e)}~]" }
+    rule_for(:ins)     {|e| "+#{content_of(e)}+" }
+    rule_for(:del)     {|e| "-#{content_of(e)}-" }
+    rule_for(:acronym) {|e| e.has_attribute?("title") ? "#{content_of(e)}(#{e["title"]})" : content_of(e) }
 
     # text formatting and layout
     rule_for(:p)          {|e| "\n\n#{content_of(e)}\n\n" }
@@ -77,10 +94,5 @@ module RainbowCloth
 
       "|#{prefix}#{content_of(e)}" 
     }
-
-    # post-processing rules
-    post_processing(/\n\n+/) { "\n\n" }
-    post_processing(/\A\s+/) { "" }
-    post_processing(/\s+\z/) { "\n" }
   end
 end

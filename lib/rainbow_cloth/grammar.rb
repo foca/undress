@@ -9,14 +9,14 @@ module RainbowCloth
         @default_rule = handler
       end
 
-      def post_processing(regexp, &handler)
-        post_processing_rules[regexp.freeze] = handler
+      def post_processing(regexp, replacement = nil, &handler)
+        post_processing_rules[regexp.freeze] = replacement || handler
       end
 
       def process(nodes)
         Array(nodes).map do |node|
           if node.text?
-            node.to_s
+            node.to_html
           elsif node.elem?
             (processing_rules[node.name.to_sym] || default_rule).call(node)
           else
@@ -28,7 +28,7 @@ module RainbowCloth
       def process!(node)
         process(node.children).tap do |text|
           post_processing_rules.each do |rule, handler|
-            text.gsub!(rule, &handler)
+            handler.is_a?(String) ?  text.gsub!(rule, handler) : text.gsub!(rule, &handler)
           end
         end
       end

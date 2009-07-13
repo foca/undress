@@ -44,6 +44,11 @@ class RainbowCloth::TextileTest < Test::Unit::TestCase
       test "converts <del> tags" do
         assert_renders_textile "-foo bar-", "<del>foo bar</del>"
       end
+
+      test "converts <acronym> tags" do
+        assert_renders_textile "EPA(Environmental Protection Agency)", "<acronym title='Environmental Protection Agency'>EPA</acronym>"
+        assert_renders_textile "EPA", "<acronym>EPA</acronym>"
+      end
     end
 
     context "links" do
@@ -172,6 +177,19 @@ class RainbowCloth::TextileTest < Test::Unit::TestCase
 
       test "strips trailing newlines from the start and end of the output string" do
         assert_renders_textile "Foo\n", "<p>Foo</p>"
+      end
+
+      test "converts all fancy characters introduced by textile back into their 'source code'" do
+        assert_renders_textile "What the ... hell?", "What the &#8230; hell?"
+        assert_renders_textile "It's mine", "It&#8217;s mine"
+        assert_renders_textile "\"Fancy quoting\"", "&#8220;Fancy quoting&#8221;"
+        assert_renders_textile "How dashing--right?", "How dashing&#8212;right?"
+        assert_renders_textile "How dashing - right?", "How dashing &#8211; right?"
+        assert_renders_textile "2 x 2 = 4", "2 &#215; 2 = 4"
+        assert_renders_textile "2x2 = 4", "2&#215;2 = 4"
+        assert_renders_textile "Registered(r)", "Registered&#174;"
+        assert_renders_textile "Copyrighted(c)", "Copyrighted&#169;"
+        assert_renders_textile "Trademarked(tm)", "Trademarked&#8482;"
       end
     end
   end
