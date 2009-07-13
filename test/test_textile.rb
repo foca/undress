@@ -1,9 +1,6 @@
-require "test/unit"
-require "contest"
-require "ruby-debug"
-require File.expand_path(File.dirname(__FILE__) + "/../lib/rainbow_cloth")
+require File.expand_path(File.dirname(__FILE__) + "/test_helper")
 
-class RainbowClothTest < Test::Unit::TestCase
+class RainbowCloth::TextileTest < Test::Unit::TestCase
   def assert_renders_textile(textile, html)
     assert_equal textile, RainbowCloth.new(html).to_textile
   end
@@ -169,3 +166,4 @@ class RainbowClothTest < Test::Unit::TestCase
     end
   end
 end
+
