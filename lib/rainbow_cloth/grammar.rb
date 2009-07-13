@@ -1,28 +1,32 @@
 module RainbowCloth
   class Grammar
-    def self.inherited(child)
-      child.instance_variable_set(:@processing_rules,      @processing_rules)
-      child.instance_variable_set(:@post_processing_rules, @post_processing_rules)
-      child.instance_variable_set(:@default_rule,          @default_rule)
+    def initialize(parent=nil, &block)
+      if parent
+        processing_rules.update(parent.processing_rules)
+        post_processing_rules.update(parent.post_processing_rules)
+        pre_processing_rules.update(parent.pre_processing_rules)
+        @default_rule = parent.default_rule.dup
+      end
+      instance_eval(&block) if block
     end
 
-    def self.rule_for(*tags, &handler)
+    def rule_for(*tags, &handler)
       tags.each {|t| processing_rules[t.to_sym] = handler }
     end
 
-    def self.default(&handler)
+    def default(&handler)
       @default_rule = handler
     end
 
-    def self.post_processing(regexp, replacement = nil, &handler)
+    def post_processing(regexp, replacement = nil, &handler)
       post_processing_rules[regexp] = replacement || handler
     end
 
-    def self.pre_processing(selector, &handler)
+    def pre_processing(selector, &handler)
       pre_processing_rules[selector] = handler
     end
 
-    def self.process(nodes)
+    def process(nodes)
       Array(nodes).map do |node|
         if node.text?
           node.to_html
@@ -34,7 +38,7 @@ module RainbowCloth
       end.join("")
     end
 
-    def self.process!(node)
+    def process!(node)
       pre_processing_rules.each do |selector, handler|
         node.search(selector).each(&handler)
       end
@@ -46,7 +50,7 @@ module RainbowCloth
       end
     end
 
-    def self.content_of(node)
+    def content_of(node)
       if node.text?
         node.to_s
       else
@@ -54,28 +58,24 @@ module RainbowCloth
       end
     end
 
-    def self.surrounded_by_whitespace?(node)
+    def surrounded_by_whitespace?(node)
       node.previous.text? && node.previous.to_s =~ /\s+$/ || node.next.text? && node.next.to_s =~ /^\s+/
     end
 
-    def self.pre_processing_rules
+    def pre_processing_rules
       @pre_processing_rules ||= {}
     end
-    private_class_method :pre_processing_rules
 
-    def self.post_processing_rules
+    def post_processing_rules
       @post_processing_rules ||= {}
     end
-    private_class_method :post_processing_rules
 
-    def self.processing_rules
+    def processing_rules
       @processing_rules ||= {}
     end
-    private_class_method :processing_rules
 
-    def self.default_rule
+    def default_rule
       @default_rule ||= lambda {|e| process(e.children) }
     end
-    private_class_method :default_rule
   end
 end

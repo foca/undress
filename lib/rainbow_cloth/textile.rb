@@ -5,7 +5,7 @@ module RainbowCloth
     end
   end
 
-  class Textile < Grammar
+  Textile = Grammar.new do
     # whitespace handling
     post_processing(/\n\n+/, "\n\n")
     post_processing(/\A\s+/, "")
