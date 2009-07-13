@@ -1,8 +1,10 @@
 module RainbowCloth
-  class Grammar
-    def initialize(parent=nil, &block)
-      @parent = parent
-      instance_eval(&block) if block
+  class Grammar < Module
+    def included(base)
+      base.processing_rules.update(processing_rules)
+      base.post_processing_rules.update(post_processing_rules)
+      base.pre_processing_rules.update(pre_processing_rules)
+      base.default(&default_rule)
     end
 
     def rule_for(*tags, &handler)
@@ -54,8 +56,7 @@ module RainbowCloth
     end
 
     def rule_for_tag(tag_name)
-      processing_rules[tag_name.to_sym] || (@parent && @parent.processing_rules[tag_name.to_sym]) ||
-        default_rule || (@parent && @parent.default_rule)
+      processing_rules[tag_name.to_sym] || default_rule
     end
 
     def surrounded_by_whitespace?(node)
