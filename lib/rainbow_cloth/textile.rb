@@ -1,5 +1,5 @@
 module RainbowCloth
-  class Parser
+  class Document
     def to_textile
       Textile.process(doc.children)
     end
