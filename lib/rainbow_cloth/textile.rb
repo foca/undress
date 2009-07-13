@@ -77,5 +77,10 @@ module RainbowCloth
 
       "|#{prefix}#{content_of(e)}" 
     }
+
+    # post-processing rules
+    post_processing(/\n\n+/) { "\n\n" }
+    post_processing(/\A\s+/) { "" }
+    post_processing(/\s+\z/) { "\n" }
   end
 end
