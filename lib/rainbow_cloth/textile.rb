@@ -1,7 +1,7 @@
 module RainbowCloth
   class Document
     def to_textile
-      Textile.process(doc.children)
+      Textile.process!(doc)
     end
   end
 

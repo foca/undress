@@ -1,5 +1,6 @@
 require "hpricot"
 
+require File.expand_path(File.dirname(__FILE__) + "/core_ext/object")
 require File.expand_path(File.dirname(__FILE__) + "/rainbow_cloth/grammar")
 require File.expand_path(File.dirname(__FILE__) + "/rainbow_cloth/textile")
 

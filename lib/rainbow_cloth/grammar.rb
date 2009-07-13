@@ -6,7 +6,11 @@ module RainbowCloth
       end
 
       def default(&handler)
-        default_rule = handler
+        @default_rule = handler
+      end
+
+      def post_processing(regexp, &handler)
+        post_processing_rules[regexp.freeze] = handler
       end
 
       def process(nodes)
@@ -19,6 +23,14 @@ module RainbowCloth
             ""
           end
         end.join("")
+      end
+
+      def process!(node)
+        process(node.children).tap do |text|
+          post_processing_rules.each do |rule, handler|
+            text.gsub!(rule, &handler)
+          end
+        end
       end
 
       def content_of(node)
@@ -34,6 +46,10 @@ module RainbowCloth
       end
 
       private
+
+        def post_processing_rules
+          @post_processing_rules ||= {}
+        end
 
         def processing_rules
           @processing_rules ||= {}
