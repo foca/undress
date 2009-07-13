@@ -75,8 +75,8 @@ class RainbowTest < Test::Unit::TestCase
       end
 
       test "converts <pre> tags which only contain a <code> child" do
-        assert_renders_textile "pc. var foo = 1;\n", "<pre><code>var foo = 1;</code></pre>"
-        assert_renders_textile "pc. var foo = 1;\n", "<pre>   <code>var foo = 1;</code>   </pre>"
+        assert_renders_textile "\n\npc. var foo = 1;\n\n", "<pre><code>var foo = 1;</code></pre>"
+        assert_renders_textile "\n\npc. var foo = 1;\n\n", "<pre>   <code>var foo = 1;</code>   </pre>"
       end
 
       test "leaves <pre> tags which contain mixed content as HTML" do
@@ -88,7 +88,7 @@ class RainbowTest < Test::Unit::TestCase
       end
 
       test "converts blockquotes" do
-        assert_renders_textile "bq. foo bar\n", "<blockquote><div>foo bar</div></blockquote>"
+        assert_renders_textile "\n\nbq. foo bar\n\n", "<blockquote><div>foo bar</div></blockquote>"
       end
     end
 

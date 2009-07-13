@@ -84,10 +84,10 @@ module Rainbow
       # text formatting and layout
       rule(:p)          {|e| "\n\n#{content_of(e)}\n\n" }
       rule(:br)         {|e| "\n" }
-      rule(:blockquote) {|e| "bq. #{content_of(e)}\n" }
+      rule(:blockquote) {|e| "\n\nbq. #{content_of(e)}\n\n" }
       rule(:pre)        {|e|
         if e.children.all? {|n| n.text? && n.content =~ /^\s+$/ || n.elem? && n.name == "code" }
-          "pc. #{content_of(e % "code")}\n"
+          "\n\npc. #{content_of(e % "code")}\n\n"
         else
           "<pre>#{content_of(e)}</pre>"
         end
