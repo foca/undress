@@ -2,25 +2,23 @@ require File.expand_path(File.dirname(__FILE__) + "/test_helper")
 
 module RainbowCloth
   class TestGrammar < Test::Unit::TestCase
-    Parent = Grammar.new do
+    class Parent < Grammar
       rule_for(:p) {|e| "<this is a paragraph>#{content_of(e)}</this is a paragraph>" }
     end
 
-    WithPreProcessingRules = Grammar.new do
-      include Parent
-
+    class WithPreProcessingRules < Parent
       pre_processing("p.foo") {|e| e.swap("<div>Cuack</div>") }
       rule_for(:div) {|e| "<this was a div>#{content_of(e)}</this was a div>" }
     end
 
-    Child = Grammar.new do
-      include Parent
+    class Child < Parent; end
+
+    class OverWriter < WithPreProcessingRules
+      rule_for(:div) {|e| content_of(e) }
     end
 
-    OverWriter = Grammar.new do
-      include WithPreProcessingRules
-
-      rule_for(:div) {|e| content_of(e) }
+    class TextileExtension < Textile
+      rule_for(:a) {|e| "" }
     end
 
     def parse_with(grammar, html)
@@ -39,6 +37,11 @@ module RainbowCloth
 
         output = parse_with WithPreProcessingRules, "<div>Foo</div>"
         assert_equal "<this was a div>Foo</this was a div>", output
+      end
+
+      test "extending textile doesn't blow up" do
+        output = parse_with TextileExtension, "<p><a href='/'>Cuack</a></p><p>Foo Bar</p><p>I <a href='/'>work</a></p>"
+        assert_equal "Foo Bar\n\nI\n", output
       end
     end
 

@@ -1,3 +1,4 @@
+require "active_support"
 require "hpricot"
 
 require File.expand_path(File.dirname(__FILE__) + "/core_ext/object")

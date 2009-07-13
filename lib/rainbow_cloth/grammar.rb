@@ -1,26 +1,47 @@
 module RainbowCloth
-  class Grammar < Module
-    def included(base)
-      base.processing_rules.update(processing_rules)
-      base.post_processing_rules.update(post_processing_rules)
-      base.pre_processing_rules.update(pre_processing_rules)
-      base.default(&default_rule)
+  class Grammar
+    def self.inherited(base)
+      base.instance_variable_set(:@post_processing_rules, post_processing_rules)
+      base.instance_variable_set(:@pre_processing_rules, pre_processing_rules)
     end
 
-    def rule_for(*tags, &handler)
-      tags.each {|t| processing_rules[t.to_sym] = handler }
+    def self.rule_for(*tags, &handler)
+      tags.each do |tag|
+        define_method tag.to_sym, &handler
+      end
     end
 
-    def default(&handler)
-      @default_rule = handler
+    def self.default(&handler)
+      define_method :method_missing do |tag, node, *args|
+        handler.call(node)
+      end
     end
 
-    def post_processing(regexp, replacement = nil, &handler)
+    def self.post_processing(regexp, replacement = nil, &handler)
       post_processing_rules[regexp] = replacement || handler
     end
 
-    def pre_processing(selector, &handler)
+    def self.post_processing_rules
+      @post_processing_rules ||= {}
+    end
+
+    def self.pre_processing(selector, &handler)
       pre_processing_rules[selector] = handler
+    end
+
+    def self.pre_processing_rules
+      @pre_processing_rules ||= {}
+    end
+
+    def self.process!(node)
+      new.process!(node)
+    end
+
+    attr_reader :pre_processing_rules, :post_processing_rules
+
+    def initialize
+      @pre_processing_rules = self.class.pre_processing_rules.dup
+      @post_processing_rules = self.class.post_processing_rules.dup
     end
 
     def process(nodes)
@@ -28,7 +49,7 @@ module RainbowCloth
         if node.text?
           node.to_html
         elsif node.elem?
-          rule_for_tag(node.name).call(node)
+          send node.name.to_sym, node
         else
           ""
         end
@@ -55,28 +76,12 @@ module RainbowCloth
       end
     end
 
-    def rule_for_tag(tag_name)
-      processing_rules[tag_name.to_sym] || default_rule
-    end
-
     def surrounded_by_whitespace?(node)
       node.previous.text? && node.previous.to_s =~ /\s+$/ || node.next.text? && node.next.to_s =~ /^\s+/
     end
 
-    def pre_processing_rules
-      @pre_processing_rules ||= {}
-    end
-
-    def post_processing_rules
-      @post_processing_rules ||= {}
-    end
-
-    def processing_rules
-      @processing_rules ||= {}
-    end
-
-    def default_rule
-      @default_rule ||= lambda {|e| process(e.children) }
+    def method_missing(tag, node, *args)
+      process(node.children)
     end
   end
 end
