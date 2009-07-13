@@ -139,6 +139,11 @@ class RainbowTest < Test::Unit::TestCase
         assert_renders_textile "\n\n* foo\n## bar\n## baz\n*** quux\n* cuack\n\n",
                                "<ul><li>foo<ol><li>bar</li><li>baz<ul><li>quux</li></ul></li></ol></li><li>cuack</li></ul>"
       end
+
+      test "converts a definition list" do
+        assert_renders_textile "\n\n- foo := defining foo =:\n- bar := defining bar =:\n\n",
+                               "<dl><dt>foo</dt><dd>defining foo</dd><dt>bar</dt><dd>defining bar</dd></dl>"
+      end
     end
   end
 end

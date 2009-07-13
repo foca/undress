@@ -82,6 +82,11 @@ module Rainbow
                      },
       :ol         => list_processor,
 
+      # definition lists
+      :dl         => lambda {|e| "\n\n#{textilize(e.children)}\n" },
+      :dt         => lambda {|e| "- #{textilize(e.children)} " },
+      :dd         => lambda {|e| ":= #{textilize(e.children)} =:\n" },
+
       # anything else
       :*          => lambda {|e| textilize(e.children) }
     }
