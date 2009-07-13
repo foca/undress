@@ -1,7 +1,7 @@
 module RainbowCloth
   class Grammar
     class << self
-      def rule(*tags, &handler)
+      def rule_for(*tags, &handler)
         tags.each {|t| processing_rules[t.to_sym] = handler }
       end
 
