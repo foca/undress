@@ -33,6 +33,10 @@ Will produce
 For now the only language supported is Textile. But I'll be happy to accept
 patches to add more languages :)
 
+== Get it
+
+    gem install undress
+
 == License
 
 Authors:: Nicolas Sanguinetti (foca[http://github.com/foca])
