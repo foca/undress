@@ -1,7 +1,7 @@
 Gem::Specification.new do |s|
   s.name    = "undress"
-  s.version = "0.1"
-  s.date    = "2009-07-13"
+  s.version = "0.1.1"
+  s.date    = "2009-07-21"
 
   s.description = "Simply translate HTML to Textile, Markdown, or whatever other markup format you need"
   s.summary     = "Convert HTML into other markup languages"
